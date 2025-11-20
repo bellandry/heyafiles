@@ -17,6 +17,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogClose,
@@ -45,6 +46,7 @@ const API_URL = "http://localhost:3002/files";
 
 export function UploadForm({ onSuccess }: UploadFormProps) {
   const [uploading, setUploading] = useState(false);
+  const [open, setOpen] = useState(false);
 
   // Initialize useForm
   const form = useForm<z.infer<typeof formSchema>>({
@@ -66,31 +68,35 @@ export function UploadForm({ onSuccess }: UploadFormProps) {
     formData.append("file", values.file);
 
     try {
-      await axios.post(API_URL, formData, {
+      const res = await axios.post(API_URL, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
+      if (res.status !== 201) {
+        toast.error(res.data.error);
+      }
       form.reset();
+      setOpen(false);
       onSuccess();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erreur upload:", error);
-      alert("Erreur lors de l'upload");
+      toast.error(error.response?.data?.message || "Erreur lors de l'upload");
     } finally {
       setUploading(false);
     }
   };
 
   return (
-    <Dialog>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="size-4" />
-              Ajouter
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button className="bg-violet-900 hover:bg-violet-800 transition-colors">
+          <Plus className="size-4" />
+          Ajouter
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <DialogHeader>
               <DialogTitle>Nouvelle image</DialogTitle>
               <DialogDescription>
@@ -149,11 +155,17 @@ export function UploadForm({ onSuccess }: UploadFormProps) {
               )}
             />
 
-            <DialogFooter>
+            <DialogFooter className="gap-2 sm:space-x-0">
               <DialogClose asChild>
-                <Button variant="outline">Annuler</Button>
+                <Button variant="outline" type="button">
+                  Annuler
+                </Button>
               </DialogClose>
-              <Button type="submit" disabled={uploading} className="flex-1">
+              <Button
+                type="submit"
+                disabled={uploading}
+                className="flex-1 bg-violet-900 hover:bg-violet-800 transition-colors"
+              >
                 {uploading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Upload en
@@ -161,14 +173,14 @@ export function UploadForm({ onSuccess }: UploadFormProps) {
                   </>
                 ) : (
                   <>
-                    <UploadCloud className="h-4 w-4" /> Uploader
+                    <UploadCloud className="h-4 w-4 mr-2" /> Uploader
                   </>
                 )}
               </Button>
             </DialogFooter>
-          </DialogContent>
-        </form>
-      </Form>
+          </form>
+        </Form>
+      </DialogContent>
     </Dialog>
   );
 }
