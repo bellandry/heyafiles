@@ -34,8 +34,8 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-slate-50 p-8 font-sans">
-      <div className="max-w-4xl mx-auto space-y-8">
+    <main className="min-h-screen bg-slate-50 p-8 font-sans w-full">
+      <div className="max-w-6xl mx-auto space-y-8">
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold tracking-tight text-slate-900">
             HeyaFiles
@@ -55,7 +55,7 @@ export default function Home() {
           ) : (
             <div className="grid gap-4 md:grid-cols-2">
               {files.map((file) => (
-                <div>
+                <div key={file._id}>
                   <h1>{file.title}</h1>
                   <p>{file.description}</p>
                 </div>
