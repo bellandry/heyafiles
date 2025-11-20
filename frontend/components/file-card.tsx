@@ -3,6 +3,7 @@
 import { FileGallery } from "@/components/file-gallery";
 import { FileItem } from "@/types/file";
 import axios from "axios";
+import Image from "next/image";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -12,16 +13,14 @@ interface FileCardProps {
   file: FileItem;
   files: FileItem[];
   index: number;
-  onFileDeleted: () => void;
 }
 
-export function FileCard({ file, files, index, onFileDeleted }: FileCardProps) {
+export function FileCard({ file, files, index }: FileCardProps) {
   const [open, setOpen] = useState(false);
 
   const handleDelete = async (fileId: string) => {
     try {
       await axios.delete(`${API_URL}/${fileId}`);
-      onFileDeleted();
     } catch (error) {
       console.error("Erreur lors de la suppression:", error);
       toast.error("Erreur lors de la suppression du fichier");
@@ -37,9 +36,11 @@ export function FileCard({ file, files, index, onFileDeleted }: FileCardProps) {
       >
         <div className="relative w-full rounded-xl hover:shadow-md aspect-square overflow-hidden bg-white">
           {file.imageUrl ? (
-            <img
+            <Image
               src={file.imageUrl}
               alt={file.title}
+              width={100}
+              height={100}
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
           ) : (

@@ -5,8 +5,11 @@ import { UploadForm } from "@/components/file-upload";
 import { FileItem } from "@/types/file";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { io } from "socket.io-client";
+import { toast } from "sonner";
 
-const API_URL = "http://192.168.1.110:3002/files";
+const API_URL = "http://localhost:3002/files";
+const SOCKET_URL = "http://localhost:3002";
 
 export default function Home() {
   const [files, setFiles] = useState<FileItem[]>([]);
@@ -26,6 +29,25 @@ export default function Home() {
 
   useEffect(() => {
     fetchFiles();
+
+    // Connect to Socket.io
+    const socket = io(SOCKET_URL);
+
+    socket.on("connect", () => {
+      alert("connectet to websocket");
+    });
+
+    // Get added document socket notification
+    socket.on("file_added", (newFile: FileItem) => {
+      setFiles((prev) => [newFile, ...prev]);
+      toast.info(`${newFile.title} a été ajouté`);
+    });
+
+    // Get deleted document socket notification
+    socket.on("file_deleted", (deletedId: string) => {
+      setFiles((prev) => prev.filter((file) => file._id !== deletedId));
+      toast.info("Un fichier  a été supprimé");
+    });
   }, []);
 
   return (
@@ -43,7 +65,7 @@ export default function Home() {
             <h2 className="text-xl md:text-2xl font-semibold text-slate-800">
               Documents ({files.length})
             </h2>
-            <UploadForm onSuccess={fetchFiles} />
+            <UploadForm />
           </div>
 
           {loading ? (
@@ -58,7 +80,6 @@ export default function Home() {
                   file={file}
                   files={files}
                   index={index}
-                  onFileDeleted={fetchFiles}
                 />
               ))}
             </div>
@@ -70,7 +91,7 @@ export default function Home() {
                 Aucun document trouvé. Uploades le premier !
               </p>
               <div className="flex justify-center">
-                <UploadForm onSuccess={fetchFiles} />
+                <UploadForm />
               </div>
             </div>
           )}

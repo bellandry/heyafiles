@@ -38,13 +38,9 @@ const formSchema = z.object({
   file: z.instanceof(File, { message: "Un fichier est requis." }),
 });
 
-interface UploadFormProps {
-  onSuccess: () => void;
-}
-
 const API_URL = "http://localhost:3002/files";
 
-export function UploadForm({ onSuccess }: UploadFormProps) {
+export function UploadForm() {
   const [uploading, setUploading] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -77,10 +73,9 @@ export function UploadForm({ onSuccess }: UploadFormProps) {
       }
       form.reset();
       setOpen(false);
-      onSuccess();
-    } catch (error: any) {
+    } catch (error) {
       console.error("Erreur upload:", error);
-      toast.error(error.response?.data?.message || "Erreur lors de l'upload");
+      toast.error("Erreur lors de l'upload");
     } finally {
       setUploading(false);
     }
