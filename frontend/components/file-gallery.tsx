@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { FileItem } from "@/types/file";
 import { ChevronLeft, ChevronRight, Trash2, X } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ConfirmDialog } from "./confirm-dialog";
 
 interface FileDialogProps {
@@ -24,6 +24,8 @@ export function FileGallery({
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
 
   const currentFile = files[currentIndex];
 
@@ -60,6 +62,31 @@ export function FileGallery({
     }
   };
 
+  // Touch handlers for mobile swipe
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.changedTouches[0].screenX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    touchEndX.current = e.changedTouches[0].screenX;
+    handleSwipe();
+  };
+
+  const handleSwipe = () => {
+    const swipeThreshold = 50; // Minimum swipe distance
+    const diff = touchStartX.current - touchEndX.current;
+
+    if (Math.abs(diff) > swipeThreshold) {
+      if (diff > 0) {
+        // Swipe left - go to next
+        goToNext();
+      } else {
+        // Swipe right - go to previous
+        goToPrevious();
+      }
+    }
+  };
+
   // Keyboard navigation
   useEffect(() => {
     if (!open) return;
@@ -89,7 +116,11 @@ export function FileGallery({
 
   return (
     <>
-      <div className="fixed inset-0 z-30 bg-white/80">
+      <div
+        className="fixed inset-0 z-30 bg-white/80"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         {/* Close button */}
         <Button
           variant="ghost"
@@ -100,12 +131,12 @@ export function FileGallery({
           <X className="size-4" />
         </Button>
 
-        {/* Navigation arrows */}
+        {/* Navigation arrows - now visible on all devices */}
         <Button
           variant="ghost"
           size="icon"
           onClick={goToPrevious}
-          className="absolute left-4 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/30 text-white hover:bg-black/50 hidden md:flex"
+          className="absolute left-4 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/30 text-white hover:bg-black/50"
         >
           <ChevronLeft className="h-8 w-8" />
         </Button>
@@ -113,7 +144,7 @@ export function FileGallery({
           variant="ghost"
           size="icon"
           onClick={goToNext}
-          className="absolute right-4 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/30 text-white hover:bg-black/50 hidden md:flex"
+          className="absolute right-4 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/30 text-white hover:bg-black/50"
         >
           <ChevronRight className="h-8 w-8" />
         </Button>
