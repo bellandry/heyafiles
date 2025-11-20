@@ -134,7 +134,7 @@ export default function FileDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Main image display */}
           <div className="lg:col-span-2">
-            <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-gray-200">
+            <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-gray-200">
               {file.imageUrl ? (
                 <Image
                   src={file.imageUrl}
@@ -152,77 +152,72 @@ export default function FileDetailPage() {
           </div>
 
           {/* File information */}
-          <div className="space-y-6">
-            <div className="bg-white rounded-xl shadow-sm p-4">
-              <h1 className="text-xl md:text-2xl font-bold text-slate-900 mb-2">
-                {file.title}
-              </h1>
+          <div className="space-y-6 py-2 px-4">
+            <h1 className="text-2xl md:text-4xl font-bold text-slate-900 mb-2">
+              {file.title}
+            </h1>
 
-              {file.description && (
-                <div className="mt-4">
-                  <h2 className="text-md font-semibold text-slate-800 mb-2">
-                    Description
-                  </h2>
-                  <p className="text-slate-600 whitespace-pre-wrap">
-                    {file.description}
-                  </p>
-                </div>
-              )}
-
-              <div className="mt-6 pt-4 pb-4 border-t border-gray-100">
-                <div className="text-sm text-slate-500">
-                  <p>
-                    Publiée le:{" "}
-                    {new Date(file.createdAt).toLocaleDateString("fr-FR")}
-                  </p>
-                </div>
-              </div>
-              <div className="pt-4 border-t border-gray-100">
-                <div className="flex gap-2">
-                  <Button
-                    onClick={handleDownload}
-                    className="bg-violet-900 hover:bg-violet-800 flex-1"
-                  >
-                    <Download className="mr-2 h-4 w-4" />
-                    Télécharger
-                  </Button>
-                  <Button
-                    variant={"destructive"}
-                    onClick={() => setShowDeleteDialog(true)}
-                    className="flex-1"
-                  >
-                    <Trash2 className="mr-2 size-4" />
-                    Supprimer
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            {/* Related files */}
-            {relatedFiles.length > 0 && (
-              <div className="">
-                <h2 className="text-md font-semibold text-slate-800 mb-4">
-                  Autres fichiers
+            {file.description && (
+              <div className="mt-4">
+                <h2 className="text-md font-semibold text-slate-800 mb-2">
+                  Description
                 </h2>
-
-                <div className="grid grid-cols-2 gap-4">
-                  {relatedFiles.map((relatedFile, index) => (
-                    <div
-                      key={relatedFile._id}
-                      className="rounded-lg overflow-hidden cursor-pointer"
-                    >
-                      <FileCard
-                        file={relatedFile}
-                        files={relatedFiles}
-                        index={index}
-                      />
-                    </div>
-                  ))}
-                </div>
+                <p className="text-slate-600 whitespace-pre-wrap">
+                  {file.description}
+                </p>
               </div>
             )}
+
+            <div className="mt-6 pt-4 pb-4 border-t border-gray-200">
+              <div className="text-sm text-slate-500">
+                <p>
+                  Publiée le:{" "}
+                  {new Date(file.createdAt).toLocaleDateString("fr-FR")}
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                onClick={handleDownload}
+                className="bg-violet-900 hover:bg-violet-800 flex-1"
+              >
+                <Download className="mr-2 h-4 w-4" />
+                Télécharger
+              </Button>
+              <Button
+                variant={"destructive"}
+                onClick={() => setShowDeleteDialog(true)}
+                className="flex-1"
+              >
+                <Trash2 className="mr-2 size-4" />
+                Supprimer
+              </Button>
+            </div>
           </div>
         </div>
+        {/* Related files */}
+        {relatedFiles.length > 0 && (
+          <div className="w-full">
+            <h2 className="text-md font-semibold text-slate-800 mb-4">
+              Autres fichiers
+            </h2>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {relatedFiles.map((relatedFile, index) => (
+                <div
+                  key={relatedFile._id}
+                  className="rounded-lg overflow-hidden cursor-pointer"
+                >
+                  <FileCard
+                    file={relatedFile}
+                    files={relatedFiles}
+                    index={index}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <ConfirmDialog
