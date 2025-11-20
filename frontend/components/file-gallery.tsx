@@ -254,7 +254,7 @@ export function FileGallery({
                       {currentFile.title}
                     </h2>
                     <p className="text-sm text-gray-300 mt-1">
-                      Créé le{" "}
+                      Ajoutée le{" "}
                       {new Date(currentFile.createdAt).toLocaleDateString(
                         "fr-FR"
                       )}

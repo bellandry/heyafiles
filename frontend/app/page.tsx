@@ -53,21 +53,25 @@ export default function Home() {
   return (
     <main className="min-h-screen p-4 sm:p-8 font-sans w-full bg-gray-50">
       <div className="max-w-4xl mx-auto space-y-8">
-        <div className="text-center space-y-2 py-6">
+        {/* Simple Header */}
+        <div className="flex items-center justify-between">
+          <div className="-space-y-1">
+            <h1 className="text-xl md:text-2xl font-bold">HeyaFiles</h1>
+            <p className="text-slate-500 text-xs">Simple files storage</p>
+          </div>
+
+          <UploadForm />
+        </div>
+        <div className="space-y-2 py-10">
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900">
-            HeyaFiles
+            Your Image Gallery
           </h1>
-          <p className="text-slate-500">Simple files storage</p>
+          <p className="text-slate-500">
+            Browse, search, and manage your images
+          </p>
         </div>
 
         <div className="space-y-6">
-          <div className="flex sm:items-center justify-between gap-4">
-            <h2 className="text-xl md:text-2xl font-semibold text-slate-800">
-              Documents ({files.length})
-            </h2>
-            <UploadForm />
-          </div>
-
           {loading ? (
             <div className="text-center py-16 text-slate-400">
               Chargement...

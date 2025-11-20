@@ -1,10 +1,11 @@
 "use client";
 
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { FileCard } from "@/components/file-card";
 import { Button } from "@/components/ui/button";
 import { FileItem } from "@/types/file";
 import axios from "axios";
-import { ArrowLeft, Download, FileWarning } from "lucide-react";
+import { ArrowLeft, Download, FileWarning, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -20,6 +21,8 @@ export default function FileDetailPage() {
   const [file, setFile] = useState<FileItem | null>(null);
   const [relatedFiles, setRelatedFiles] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchFile = async () => {
     try {
@@ -63,6 +66,21 @@ export default function FileDetailPage() {
     }
   };
 
+  const handleDelete = async () => {
+    try {
+      setDeleting(true);
+      await axios.delete(`${API_URL}/${id}`);
+      toast.success("Fichier supprimé avec succès");
+      router.push("/");
+    } catch (error) {
+      console.error("Error deleting file:", error);
+      toast.error("Erreur lors de la suppression du fichier");
+    } finally {
+      setDeleting(false);
+      setShowDeleteDialog(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen p-4 sm:p-8 font-sans w-full bg-gray-50">
@@ -99,8 +117,8 @@ export default function FileDetailPage() {
   }
 
   return (
-    <div className="min-h-screen p-4 sm:p-8 font-sans w-full bg-gray-50">
-      <div className="max-w-6xl mx-auto space-y-8">
+    <div className="min-h-screen p-4 sm:p-6 font-sans w-full bg-gray-50">
+      <div className="max-w-5xl mx-auto space-y-6">
         {/* Minimalist header */}
         <div className="flex items-center justify-between">
           <Button
@@ -111,17 +129,9 @@ export default function FileDetailPage() {
             <ArrowLeft className="mr-2 h-4 w-4" />
             Retour
           </Button>
-
-          <Button
-            onClick={handleDownload}
-            className="bg-violet-900 hover:bg-violet-800"
-          >
-            <Download className="mr-2 h-4 w-4" />
-            Télécharger
-          </Button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Main image display */}
           <div className="lg:col-span-2">
             <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-gray-200">
@@ -143,7 +153,7 @@ export default function FileDetailPage() {
 
           {/* File information */}
           <div className="space-y-6">
-            <div className="bg-white rounded-xl shadow-sm p-6">
+            <div className="bg-white rounded-xl shadow-sm p-4">
               <h1 className="text-xl md:text-2xl font-bold text-slate-900 mb-2">
                 {file.title}
               </h1>
@@ -159,20 +169,39 @@ export default function FileDetailPage() {
                 </div>
               )}
 
-              <div className="mt-6 pt-4 border-t border-gray-100">
+              <div className="mt-6 pt-4 pb-4 border-t border-gray-100">
                 <div className="text-sm text-slate-500">
                   <p>
-                    Publié le:{" "}
+                    Publiée le:{" "}
                     {new Date(file.createdAt).toLocaleDateString("fr-FR")}
                   </p>
+                </div>
+              </div>
+              <div className="pt-4 border-t border-gray-100">
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleDownload}
+                    className="bg-violet-900 hover:bg-violet-800 flex-1"
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    Télécharger
+                  </Button>
+                  <Button
+                    variant={"destructive"}
+                    onClick={() => setShowDeleteDialog(true)}
+                    className="flex-1"
+                  >
+                    <Trash2 className="mr-2 size-4" />
+                    Supprimer
+                  </Button>
                 </div>
               </div>
             </div>
 
             {/* Related files */}
             {relatedFiles.length > 0 && (
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <h2 className="text-lg font-semibold text-slate-800 mb-4">
+              <div className="">
+                <h2 className="text-md font-semibold text-slate-800 mb-4">
                   Autres fichiers
                 </h2>
 
@@ -195,6 +224,15 @@ export default function FileDetailPage() {
           </div>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        onConfirm={handleDelete}
+        disabled={deleting}
+        description={`Êtes-vous sûr de vouloir supprimer "${file.title}" ? Cette action est irréversible.`}
+        confirmText={deleting ? "Suppression en cours..." : "Supprimer"}
+      />
     </div>
   );
 }
