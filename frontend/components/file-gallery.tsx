@@ -228,9 +228,8 @@ export function FileGallery({
                       <Image
                         src={currentFile.imageUrl}
                         alt={currentFile.title}
-                        width={500}
-                        height={500}
-                        className="object-contain max-h-[calc(100vh-200px)] max-w-full"
+                        fill
+                        className="object-contain max-w-full"
                       />
                     ) : (
                       <div className="text-gray-500">Image non disponible</div>

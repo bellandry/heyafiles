@@ -135,7 +135,7 @@ export function UploadForm() {
       <DialogTrigger asChild>
         <Button className="bg-violet-900 hover:bg-violet-800 transition-colors">
           <Plus className="size-4" />
-          Ajouter
+          <span className="hidden md:block">Ajouter</span>
         </Button>
       </DialogTrigger>
       <DialogContent>
