@@ -1,17 +1,11 @@
 "use client";
 
+import { FileCard } from "@/components/file-card";
+import { FileItem } from "@/types/file";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
 const API_URL = "http://localhost:3002/files";
-
-interface FileItem {
-  _id: string;
-  title: string;
-  description: string;
-  fileUrl: string;
-  fileKey: string;
-}
 
 export default function Home() {
   const [files, setFiles] = useState<FileItem[]>([]);
@@ -34,8 +28,8 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-slate-50 p-8 font-sans w-full">
-      <div className="max-w-6xl mx-auto space-y-8">
+    <main className="min-h-screen p-8 font-sans w-full">
+      <div className="max-w-5xl mx-auto space-y-8">
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold tracking-tight text-slate-900">
             HeyaFiles
@@ -53,12 +47,9 @@ export default function Home() {
               Chargement...
             </div>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-4">
               {files.map((file) => (
-                <div key={file._id}>
-                  <h1>{file.title}</h1>
-                  <p>{file.description}</p>
-                </div>
+                <FileCard key={file._id} file={file} />
               ))}
             </div>
           )}
