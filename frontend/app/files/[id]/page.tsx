@@ -118,7 +118,7 @@ export default function FileDetailPage() {
 
   return (
     <div className="min-h-screen p-4 sm:p-4 font-sans w-full bg-gray-50">
-      <div className="max-w-5xl mx-auto space-y-4">
+      <div className="max-w-6xl mx-auto space-y-6">
         {/* Minimalist header */}
         <div className="flex items-center justify-between">
           <Button
@@ -212,6 +212,7 @@ export default function FileDetailPage() {
                     file={relatedFile}
                     files={relatedFiles}
                     index={index}
+                    className="aspect-video"
                   />
                 </div>
               ))}

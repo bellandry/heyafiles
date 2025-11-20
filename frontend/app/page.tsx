@@ -1,11 +1,10 @@
 "use client";
 
 import { FileCard } from "@/components/file-card";
+import { SearchInput } from "@/components/search-input";
 import { UploadForm } from "@/components/file-upload";
-import { Input } from "@/components/ui/input";
 import { FileItem } from "@/types/file";
 import axios from "axios";
-import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import { toast } from "sonner";
@@ -83,15 +82,11 @@ export default function Home() {
             <p className="text-slate-500 text-xs">Simple files storage</p>
           </div>
           <div className="flex gap-4">
-            <div className="relative">
-              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
-              <Input
-                placeholder="Search files..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8 border border-violet-400 focus-visible:border-violet-500"
-              />
-            </div>
+            <SearchInput
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder="Search files..."
+            />
             <UploadForm />
           </div>
         </div>

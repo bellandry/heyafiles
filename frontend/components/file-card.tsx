@@ -13,9 +13,10 @@ interface FileCardProps {
   file: FileItem;
   files: FileItem[];
   index: number;
+  className?: string;
 }
 
-export function FileCard({ file, files, index }: FileCardProps) {
+export function FileCard({ file, files, index, className }: FileCardProps) {
   const [open, setOpen] = useState(false);
 
   const handleDelete = async (fileId: string) => {
@@ -34,7 +35,9 @@ export function FileCard({ file, files, index }: FileCardProps) {
         className="flex flex-col rounded-xl transition-all group cursor-pointer"
         onClick={() => setOpen(true)}
       >
-        <div className="relative w-full rounded-xl hover:shadow-md aspect-square overflow-hidden bg-white">
+        <div
+          className={`relative w-full rounded-xl hover:shadow-md aspect-square overflow-hidden bg-white ${className}`}
+        >
           {file.imageUrl ? (
             <Image
               src={file.imageUrl}
