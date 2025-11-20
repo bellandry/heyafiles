@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { FileItem } from "@/types/file";
+import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ConfirmDialog } from "./confirm-dialog";
@@ -24,22 +25,35 @@ export function FileGallery({
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [direction, setDirection] = useState(0); // -1 for left, 1 for right
+  const [isClosing, setIsClosing] = useState(false);
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
 
   const currentFile = files[currentIndex];
 
   const goToPrevious = useCallback(() => {
+    setDirection(-1);
     setCurrentIndex((prevIndex) =>
       prevIndex === 0 ? files.length - 1 : prevIndex - 1
     );
   }, [files.length]);
 
   const goToNext = useCallback(() => {
+    setDirection(1);
     setCurrentIndex((prevIndex) =>
       prevIndex === files.length - 1 ? 0 : prevIndex + 1
     );
   }, [files.length]);
+
+  const handleClose = () => {
+    setIsClosing(true);
+    // Delay closing to allow animation to complete
+    setTimeout(() => {
+      setIsClosing(false);
+      onClose();
+    }, 200); // Match the animation duration
+  };
 
   const handleDelete = () => {
     setShowConfirmDialog(true);
@@ -50,7 +64,7 @@ export function FileGallery({
     try {
       await onDelete(currentFile._id);
       if (files.length <= 1) {
-        onClose();
+        handleClose();
       } else {
         goToNext();
       }
@@ -93,7 +107,7 @@ export function FileGallery({
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        onClose();
+        handleClose();
       } else if (e.key === "ArrowLeft") {
         goToPrevious();
       } else if (e.key === "ArrowRight") {
@@ -103,7 +117,7 @@ export function FileGallery({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [open, goToNext, goToPrevious, onClose]);
+  }, [open, goToNext, goToPrevious]);
 
   // Reset index when files change
   useEffect(() => {
@@ -114,85 +128,152 @@ export function FileGallery({
 
   if (!open || !currentFile) return null;
 
+  // Animation variants
+  const slideVariants = {
+    hiddenRight: {
+      x: "100%",
+      opacity: 0,
+    },
+    hiddenLeft: {
+      x: "-100%",
+      opacity: 0,
+    },
+    visible: {
+      x: "0",
+      opacity: 1,
+      transition: {
+        duration: 0.3,
+      },
+    },
+    exitRight: {
+      x: "100%",
+      opacity: 0,
+      transition: {
+        duration: 0.3,
+      },
+    },
+    exitLeft: {
+      x: "-100%",
+      opacity: 0,
+      transition: {
+        duration: 0.3,
+      },
+    },
+  };
+
+  const getInitialVariant = () => {
+    return direction === 1 ? "hiddenRight" : "hiddenLeft";
+  };
+
+  const getExitVariant = () => {
+    return direction === 1 ? "exitLeft" : "exitRight";
+  };
+
   return (
     <>
-      <div
-        className="fixed inset-0 z-30 bg-white/80"
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-      >
-        {/* Close button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onClose}
-          className="absolute top-4 right-4 z-10 rounded-full bg-black/30 text-white hover:bg-red-600/50 hover:text-white"
-        >
-          <X className="size-4" />
-        </Button>
+      <AnimatePresence>
+        {open && !isClosing && (
+          <motion.div
+            className="fixed inset-0 z-30 bg-white/80"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
+            {/* Close button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleClose}
+              className="absolute top-4 right-4 z-10 rounded-full bg-black/30 text-white hover:bg-red-600/50 hover:text-white"
+            >
+              <X className="size-4" />
+            </Button>
 
-        {/* Navigation arrows - now visible on all devices */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={goToPrevious}
-          className="absolute left-4 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/30 text-white hover:bg-black/50"
-        >
-          <ChevronLeft className="h-8 w-8" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={goToNext}
-          className="absolute right-4 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/30 text-white hover:bg-black/50"
-        >
-          <ChevronRight className="h-8 w-8" />
-        </Button>
+            {/* Navigation arrows - now visible on all devices */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={goToPrevious}
+              className="absolute left-4 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/30 text-white hover:bg-black/50"
+            >
+              <ChevronLeft className="h-8 w-8" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={goToNext}
+              className="absolute right-4 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/30 text-white hover:bg-black/50"
+            >
+              <ChevronRight className="h-8 w-8" />
+            </Button>
 
-        {/* Image container */}
-        <div className="flex h-full items-center justify-center">
-          <div className="relative h-full w-full flex items-center justify-center">
-            {currentFile.imageUrl ? (
-              <img
-                src={currentFile.imageUrl}
-                alt={currentFile.title}
-                className="object-contain max-h-[calc(100vh-200px)] max-w-full"
-              />
-            ) : (
-              <div className="text-gray-500">Image non disponible</div>
-            )}
-          </div>
-        </div>
-
-        {/* Information panel */}
-        <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 to-transparent p-6 pt-16">
-          <div className="max-w-4xl mx-auto">
-            <div className="flex justify-between items-start gap-4">
-              <div>
-                <h2 className="text-lg md:text-xl font-bold text-white">
-                  {currentFile.title}
-                </h2>
-                <p className="text-sm text-gray-300 mt-1">
-                  Créé le{" "}
-                  {new Date(currentFile.createdAt).toLocaleDateString("fr-FR")}
-                </p>
-                {currentFile.description && (
-                  <p className="text-white mt-2 max-w-2xl">
-                    {currentFile.description}
-                  </p>
-                )}
+            {/* Image container with animations */}
+            <div className="flex h-full items-center justify-center">
+              <div className="relative h-full w-full flex items-center justify-center">
+                <AnimatePresence mode="wait" initial={false} custom={direction}>
+                  <motion.div
+                    key={currentIndex}
+                    variants={slideVariants}
+                    initial={getInitialVariant()}
+                    animate="visible"
+                    exit={getExitVariant()}
+                    className="absolute inset-0 flex items-center justify-center"
+                  >
+                    {currentFile.imageUrl ? (
+                      <img
+                        src={currentFile.imageUrl}
+                        alt={currentFile.title}
+                        className="object-contain max-h-[calc(100vh-200px)] max-w-full"
+                      />
+                    ) : (
+                      <div className="text-gray-500">Image non disponible</div>
+                    )}
+                  </motion.div>
+                </AnimatePresence>
               </div>
-              <Button
-                variant="destructive"
-                onClick={handleDelete}
-                className="rounded-full hover:text-white  hover:bg-red-700"
-              >
-                <Trash2 />
-              </Button>
             </div>
-          </div>
-        </div>
-      </div>
+
+            {/* Information panel */}
+            <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 to-transparent p-6 pt-16">
+              <motion.div
+                className="max-w-4xl mx-auto"
+                initial={{ y: 50, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.2, duration: 0.3 }}
+              >
+                <div className="flex justify-between items-start gap-4">
+                  <div>
+                    <h2 className="text-lg md:text-xl font-bold text-white">
+                      {currentFile.title}
+                    </h2>
+                    <p className="text-sm text-gray-300 mt-1">
+                      Créé le{" "}
+                      {new Date(currentFile.createdAt).toLocaleDateString(
+                        "fr-FR"
+                      )}
+                    </p>
+                    {currentFile.description && (
+                      <p className="text-white mt-2 max-w-2xl">
+                        {currentFile.description}
+                      </p>
+                    )}
+                  </div>
+                  <Button
+                    variant="destructive"
+                    onClick={handleDelete}
+                    className="rounded-full hover:text-white  hover:bg-red-700"
+                  >
+                    <Trash2 />
+                  </Button>
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <ConfirmDialog
         open={showConfirmDialog}
