@@ -1,8 +1,8 @@
 "use client";
 
 import { FileCard } from "@/components/file-card";
-import { SearchInput } from "@/components/search-input";
 import { UploadForm } from "@/components/file-upload";
+import { SearchInput } from "@/components/search-input";
 import { FileItem } from "@/types/file";
 import axios from "axios";
 import { useEffect, useState } from "react";
@@ -82,11 +82,13 @@ export default function Home() {
             <p className="text-slate-500 text-xs">Simple files storage</p>
           </div>
           <div className="flex gap-4">
-            <SearchInput
-              value={searchQuery}
-              onChange={setSearchQuery}
-              placeholder="Search files..."
-            />
+            <div className="hidden md:block">
+              <SearchInput
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder="Search files..."
+              />
+            </div>
             <UploadForm />
           </div>
         </div>
@@ -106,6 +108,13 @@ export default function Home() {
             </div>
           ) : (
             <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4  gap-4">
+              <div className="relative col-span-2 md:hidden">
+                <SearchInput
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                  placeholder="Search files..."
+                />
+              </div>
               {filteredFiles.map((file, index) => (
                 <FileCard
                   key={file._id}
