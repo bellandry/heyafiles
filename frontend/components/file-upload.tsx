@@ -2,8 +2,14 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import { Loader2, Plus, UploadCloud } from "lucide-react";
-import { useState } from "react";
+import {
+  FileText,
+  Image as ImageIcon,
+  Loader2,
+  Plus,
+  UploadCloud,
+} from "lucide-react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
@@ -17,6 +23,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -43,6 +50,8 @@ const API_URL = "http://localhost:3002/files";
 export function UploadForm() {
   const [uploading, setUploading] = useState(false);
   const [open, setOpen] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [dragActive, setDragActive] = useState(false);
 
   // Initialize useForm
   const form = useForm<z.infer<typeof formSchema>>({
@@ -52,6 +61,46 @@ export function UploadForm() {
       description: "",
     },
   });
+
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const file = e.dataTransfer.files[0];
+      // Check if file type is allowed
+      if (file.type.startsWith("image/") || file.type === "application/pdf") {
+        form.setValue("file", file);
+      } else {
+        toast.error(
+          "Type de fichier non supporté. Veuillez utiliser une image ou un PDF."
+        );
+      }
+    }
+  };
+
+  const handleFileChange = (file: File | null) => {
+    if (file) {
+      form.setValue("file", file);
+    }
+  };
+
+  const triggerFileInput = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setUploading(true);
@@ -120,7 +169,11 @@ export function UploadForm() {
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Input placeholder="Description courte..." {...field} />
+                    <Textarea
+                      placeholder="Description détaillée..."
+                      className="min-h-24"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -134,16 +187,64 @@ export function UploadForm() {
                 <FormItem>
                   <FormLabel>Fichier</FormLabel>
                   <FormControl>
-                    <Input
-                      {...fieldProps}
-                      type="file"
-                      accept="application/pdf, image/*"
-                      onChange={(event) => {
-                        const file =
-                          event.target.files && event.target.files[0];
-                        onChange(file);
-                      }}
-                    />
+                    <div
+                      className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-all duration-200 ${
+                        dragActive
+                          ? "border-violet-500 bg-violet-50"
+                          : "border-gray-300 hover:border-violet-300 hover:bg-violet-50"
+                      }`}
+                      onDragEnter={handleDrag}
+                      onDragLeave={handleDrag}
+                      onDragOver={handleDrag}
+                      onDrop={handleDrop}
+                      onClick={triggerFileInput}
+                    >
+                      <Input
+                        {...fieldProps}
+                        ref={fileInputRef}
+                        type="file"
+                        accept="application/pdf, image/*"
+                        onChange={(event) => {
+                          const file =
+                            event.target.files && event.target.files[0];
+                          onChange(file);
+                          handleFileChange(file);
+                        }}
+                        className="hidden"
+                      />
+                      <div className="flex flex-col items-center justify-center gap-3">
+                        {value ? (
+                          <div className="flex flex-col items-center">
+                            <div className="bg-violet-100 p-3 rounded-full">
+                              {value.type.startsWith("image/") ? (
+                                <ImageIcon className="h-6 w-6 text-violet-600" />
+                              ) : (
+                                <FileText className="h-6 w-6 text-violet-600" />
+                              )}
+                            </div>
+                            <p className="font-medium mt-2 text-sm truncate max-w-xs">
+                              {value.name}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {(value.size / 1024 / 1024).toFixed(2)} MB
+                            </p>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="bg-violet-100 p-3 rounded-full">
+                              <UploadCloud className="h-6 w-6 text-violet-600" />
+                            </div>
+                            <p className="font-medium">
+                              Glissez-déposez un fichier ou cliquez pour
+                              parcourir
+                            </p>
+                            <p className="text-sm text-gray-500">
+                              Formats supportés: PDF, JPG, PNG
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
