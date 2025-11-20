@@ -34,7 +34,7 @@ export default function Home() {
     const socket = io(SOCKET_URL);
 
     socket.on("connect", () => {
-      alert("connectet to websocket");
+      console.log("connectet to websocket");
     });
 
     // Get added document socket notification
