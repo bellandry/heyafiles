@@ -3,7 +3,9 @@
 import { Button } from "@/components/ui/button";
 import { FileItem } from "@/types/file";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, Trash2, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Eye, Trash2, X } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ConfirmDialog } from "./confirm-dialog";
 
@@ -174,7 +176,7 @@ export function FileGallery({
       <AnimatePresence>
         {open && !isClosing && (
           <motion.div
-            className="fixed inset-0 z-30 bg-white/80"
+            className="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -223,9 +225,11 @@ export function FileGallery({
                     className="absolute inset-0 flex items-center justify-center"
                   >
                     {currentFile.imageUrl ? (
-                      <img
+                      <Image
                         src={currentFile.imageUrl}
                         alt={currentFile.title}
+                        width={500}
+                        height={500}
                         className="object-contain max-h-[calc(100vh-200px)] max-w-full"
                       />
                     ) : (
@@ -261,13 +265,20 @@ export function FileGallery({
                       </p>
                     )}
                   </div>
-                  <Button
-                    variant="destructive"
-                    onClick={handleDelete}
-                    className="rounded-full hover:text-white  hover:bg-red-700"
-                  >
-                    <Trash2 />
-                  </Button>
+                  <div className="flex flex-col items-center gap-4">
+                    <Button variant="outline" className="rounded-full" asChild>
+                      <Link href={`/files/${currentFile._id}`}>
+                        <Eye />
+                      </Link>
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={handleDelete}
+                      className="rounded-full hover:text-white  hover:bg-red-700"
+                    >
+                      <Trash2 />
+                    </Button>
+                  </div>
                 </div>
               </motion.div>
             </div>

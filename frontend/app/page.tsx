@@ -52,7 +52,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen p-4 sm:p-8 font-sans w-full bg-gray-50">
-      <div className="max-w-5xl mx-auto space-y-8">
+      <div className="max-w-4xl mx-auto space-y-8">
         <div className="text-center space-y-2 py-6">
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900">
             HeyaFiles
@@ -73,7 +73,7 @@ export default function Home() {
               Chargement...
             </div>
           ) : (
-            <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4  gap-4">
               {files.map((file, index) => (
                 <FileCard
                   key={file._id}

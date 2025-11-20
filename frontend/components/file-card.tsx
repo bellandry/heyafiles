@@ -52,7 +52,7 @@ export function FileCard({ file, files, index }: FileCardProps) {
           )}
         </div>
         <div className="p-2 flex-1 flex flex-col">
-          <h3 className="font-semibold text-gray-900 truncate group-hover:text-violet-800 transition-colors">
+          <h3 className="font-semibold text-gray-900 text-sm truncate group-hover:text-violet-800 transition-colors">
             {file.title}
           </h3>
         </div>
