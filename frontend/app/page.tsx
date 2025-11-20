@@ -1,6 +1,7 @@
 "use client";
 
 import { FileCard } from "@/components/file-card";
+import { UploadForm } from "@/components/file-upload";
 import { FileItem } from "@/types/file";
 import axios from "axios";
 import { useEffect, useState } from "react";
@@ -38,9 +39,12 @@ export default function Home() {
         </div>
 
         <div className="space-y-4">
-          <h2 className="text-2xl font-semibold text-slate-800">
-            Mes Documents ({files.length})
-          </h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-semibold text-slate-800">
+              Mes Documents ({files.length})
+            </h2>
+            <UploadForm onSuccess={fetchFiles} />
+          </div>
 
           {loading ? (
             <div className="text-center py-10 text-slate-400">
@@ -55,8 +59,9 @@ export default function Home() {
           )}
 
           {!loading && files.length === 0 && (
-            <div className="text-center py-10 border-2 border-dashed rounded-lg text-slate-400">
-              Aucun document trouvé. Uploades le premier !
+            <div className="text-center space-y-6 py-10 border-2 border-dashed rounded-lg text-slate-400">
+              <p>Aucun document trouvé. Uploades le premier !</p>
+              <UploadForm onSuccess={fetchFiles} />
             </div>
           )}
         </div>
