@@ -25,6 +25,7 @@ export function FileCard({ file, files, index, onFileDeleted }: FileCardProps) {
     } catch (error) {
       console.error("Erreur lors de la suppression:", error);
       toast.error("Erreur lors de la suppression du fichier");
+      throw error;
     }
   };
 

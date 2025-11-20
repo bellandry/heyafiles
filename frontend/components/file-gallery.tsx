@@ -23,6 +23,7 @@ export function FileGallery({
 }: FileDialogProps) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const currentFile = files[currentIndex];
 
@@ -42,12 +43,20 @@ export function FileGallery({
     setShowConfirmDialog(true);
   };
 
-  const confirmDelete = () => {
-    onDelete(currentFile._id);
-    if (files.length <= 1) {
-      onClose();
-    } else {
-      goToNext();
+  const confirmDelete = async () => {
+    setIsDeleting(true);
+    try {
+      await onDelete(currentFile._id);
+      if (files.length <= 1) {
+        onClose();
+      } else {
+        goToNext();
+      }
+    } catch (error) {
+      console.error("Error deleting file: ", error);
+    } finally {
+      setIsDeleting(false);
+      setShowConfirmDialog(false);
     }
   };
 
@@ -91,7 +100,7 @@ export function FileGallery({
           <X className="size-4" />
         </Button>
 
-        {/* Navigation arrows (desktop only) */}
+        {/* Navigation arrows */}
         <Button
           variant="ghost"
           size="icon"
@@ -160,8 +169,9 @@ export function FileGallery({
         onConfirm={confirmDelete}
         title="Confirmer la suppression"
         description={`Êtes-vous sûr de vouloir supprimer "${currentFile.title}" ? Cette action est irréversible.`}
-        confirmText="Supprimer"
+        confirmText={isDeleting ? "Suppression en cours..." : "Supprimer"}
         cancelText="Annuler"
+        disabled={isDeleting}
       />
     </>
   );
