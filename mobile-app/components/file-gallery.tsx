@@ -1,5 +1,6 @@
 import { FileData } from "@/types/file";
-import { ChevronLeft, ChevronRight, X } from "lucide-react-native";
+import { router } from "expo-router";
+import { ChevronLeft, ChevronRight, Eye, X } from "lucide-react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   Dimensions,
@@ -107,9 +108,23 @@ export function FileGallery({
 
             {/* INFO PANEL */}
             <View className="absolute bottom-0 left-0 right-0 p-6 bg-black/40">
-              <Text className="text-white text-xl font-bold">
-                {currentFile.title}
-              </Text>
+              <View className="flex flex-row justify-between items-center">
+                <Text className="text-white text-xl font-bold">
+                  {currentFile.title}
+                </Text>
+                <TouchableOpacity
+                  onPress={() =>
+                    router.push({
+                      pathname: "/files/[id]",
+                      params: { id: currentFile._id },
+                    })
+                  }
+                >
+                  <Text className="bg-white p-2 rounded-full">
+                    <Eye color={"black"} size={20} />
+                  </Text>
+                </TouchableOpacity>
+              </View>
               <Text className="text-gray-400 text-xs mt-2">
                 Ajouté le{" "}
                 {new Date(currentFile.createdAt).toLocaleDateString("fr-FR")}
