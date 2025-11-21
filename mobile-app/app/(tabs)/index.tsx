@@ -2,27 +2,26 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
-  Platform,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
 
 import { FileCard } from "@/components/file-card";
+import { UploadModal } from "@/components/upload-modal";
+import { API_URL } from "@/constants/api";
 import { FileData } from "@/types/file";
+import { Plus } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { io, Socket } from "socket.io-client";
-
-const API_URL =
-  Platform.OS === "android"
-    ? "http://10.166.214.236:3002"
-    : "http://localhost:3002";
 
 export default function HomeScreen() {
   const [files, setFiles] = useState<FileData[]>([]);
   const [loading, setLoading] = useState(true);
   const [socket, setSocket] = useState<Socket | null>(null);
   const [selectedFile, setSelectedFile] = useState<FileData | null>(null);
+  const [isUploadModalVisible, setUploadModalVisible] = useState(false);
 
   const fetchFiles = async () => {
     try {
@@ -102,7 +101,7 @@ export default function HomeScreen() {
             </View>
           )}
           ListHeaderComponent={
-            <View className="space-y-2 py-14 px-6">
+            <View className="space-y-2 py-10 px-2">
               <Text className="text-3xl font-bold tracking-tight text-violet-950">
                 Your Image Gallery
               </Text>
@@ -113,6 +112,17 @@ export default function HomeScreen() {
           }
         />
       )}
+      <TouchableOpacity
+        onPress={() => setUploadModalVisible(true)}
+        className="absolute bottom-8 right-8 bg-violet-600 rounded-full shadow-md shadow-slate-500 flex flex-row p-4 gap-2 items-center justify-center elevation-5"
+      >
+        <Plus color="white" size={20} />
+        <Text className="text-white  font-medium">Ajouter</Text>
+      </TouchableOpacity>
+      <UploadModal
+        visible={isUploadModalVisible}
+        onClose={() => setUploadModalVisible(false)}
+      />
     </SafeAreaView>
   );
 }
