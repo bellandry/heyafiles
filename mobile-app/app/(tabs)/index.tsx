@@ -15,7 +15,7 @@ import { io, Socket } from "socket.io-client";
 
 const API_URL =
   Platform.OS === "android"
-    ? "http://10.166.214.236:3002"
+    ? "http://192.168.1.110:3002"
     : "http://localhost:3002";
 
 export default function HomeScreen() {
@@ -48,8 +48,8 @@ export default function HomeScreen() {
       console.log("Socket connected:", newSocket.id);
     });
 
-    newSocket.on("file_created", (newFile: FileData) => {
-      console.log("Socket: file_created", newFile);
+    newSocket.on("file_added", (newFile: FileData) => {
+      console.log("Socket: file_added", newFile);
       setFiles((prev) => {
         if (prev.find((f) => f._id === newFile._id)) return prev;
         return [newFile, ...prev];
@@ -76,9 +76,12 @@ export default function HomeScreen() {
           <Text className="text-2xl font-bold text-violet-900">HeyaFiles</Text>
           <Text className="text-xs">Simple files storage</Text>
         </View>
-        <View
-          className={`h-3 w-3 rounded-full ${socket?.connected ? "bg-green-500" : "bg-red-500"}`}
-        />
+        <View className="flex items-center flex-row gap-2">
+          <View
+            className={`h-3 w-3 rounded-full ${socket?.connected ? "bg-green-500" : "bg-red-500"}`}
+          />
+          <Text>{socket?.connected ? "En ligne" : "Hors ligne"}</Text>
+        </View>
       </View>
 
       {/* List */}
