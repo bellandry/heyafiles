@@ -17,29 +17,28 @@ export default function TabLayout() {
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarStyle: {
+          position: "absolute",
+          bottom: 20,
+
+          width: 200,
+          height: 65,
+
+          left: "50%",
+          marginLeft: 90,
+
           borderRadius: 50,
-          marginHorizontal: 20,
-          marginBottom: 20,
           paddingHorizontal: 10,
           paddingTop: 10,
           paddingBottom: 15,
-          height: 65,
-          width: 200,
-          alignContent: "center",
-          position: "absolute",
+
           backgroundColor: Colors[colorScheme ?? "light"].background,
           borderTopWidth: 0,
+
           elevation: 5,
           shadowColor: "#000",
-          shadowOffset: {
-            width: 0,
-            height: 2,
-          },
+          shadowOffset: { width: 0, height: 2 },
           shadowOpacity: 0.25,
           shadowRadius: 3.84,
-          alignSelf: "center", // Center the tab bar horizontally
-          left: 0, // Reset left positioning
-          right: 0,
         },
       }}
     >
