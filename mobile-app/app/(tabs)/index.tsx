@@ -15,7 +15,7 @@ import { io, Socket } from "socket.io-client";
 
 const API_URL =
   Platform.OS === "android"
-    ? "http://192.168.1.110:3002"
+    ? "http://10.166.214.236:3002"
     : "http://localhost:3002";
 
 export default function HomeScreen() {
@@ -98,7 +98,7 @@ export default function HomeScreen() {
           columnWrapperStyle={{ gap: 12 }}
           renderItem={({ item, index }) => (
             <View key={item._id} className="flex-1 mb-4">
-              <FileCard file={item} />
+              <FileCard file={item} files={files} index={index} />
             </View>
           )}
           ListHeaderComponent={
