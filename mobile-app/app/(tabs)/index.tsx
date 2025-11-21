@@ -2,24 +2,16 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
-  Image,
   Platform,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
 
+import { FileCard } from "@/components/file-card";
+import { FileData } from "@/types/file";
 import { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { io, Socket } from "socket.io-client";
-
-interface FileData {
-  id: string;
-  title: string;
-  description: string;
-  imageUrl: string;
-  createdAt: string;
-}
 
 const API_URL =
   Platform.OS === "android"
@@ -59,16 +51,16 @@ export default function HomeScreen() {
     newSocket.on("file_created", (newFile: FileData) => {
       console.log("Socket: file_created", newFile);
       setFiles((prev) => {
-        if (prev.find((f) => f.id === newFile.id)) return prev;
+        if (prev.find((f) => f._id === newFile._id)) return prev;
         return [newFile, ...prev];
       });
     });
 
     newSocket.on("file_deleted", (deletedId: string) => {
       console.log("Socket: file_deleted", deletedId);
-      setFiles((prev) => prev.filter((f) => f.id !== deletedId));
+      setFiles((prev) => prev.filter((f) => f._id !== deletedId));
       setSelectedFile((current) =>
-        current?.id === deletedId ? null : current
+        current?._id === deletedId ? null : current
       );
     });
 
@@ -77,7 +69,7 @@ export default function HomeScreen() {
     };
   }, []);
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <SafeAreaView className="flex-1 bg-gray-100">
       {/* Header */}
       <View className="px-6 py-4 bg-white shadow-sm z-10 flex-row justify-between items-center">
         <View className="-space-y-1">
@@ -89,15 +81,6 @@ export default function HomeScreen() {
         />
       </View>
 
-      <View className="space-y-2 py-10 px-6">
-        <Text className="text-3xl font-bold tracking-tight text-violet-950">
-          Your Image Gallery
-        </Text>
-        <Text className="text-slate-500">
-          Browse, search, and manage your uploaded images
-        </Text>
-      </View>
-
       {/* List */}
       {loading ? (
         <View className="flex-1 justify-center items-center">
@@ -107,28 +90,23 @@ export default function HomeScreen() {
         <FlatList
           data={files}
           numColumns={2}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <TouchableOpacity key={item.id} style={{ flex: 0.5 }}>
-              <View className="w-full aspect-square bg-gray-200 rounded-lg items-center justify-center mr-4">
-                <Image
-                  source={{ uri: item.imageUrl }}
-                  style={{ width: "100%", height: "100%" }}
-                  className="rounded-md"
-                />
-              </View>
-              <View className="flex-1">
-                <Text className="text-md font-semibold text-gray-800">
-                  {item.title}
-                </Text>
-              </View>
-            </TouchableOpacity>
+          keyExtractor={(item) => item._id}
+          contentContainerStyle={{ padding: 10 }}
+          columnWrapperStyle={{ gap: 12 }}
+          renderItem={({ item, index }) => (
+            <View key={item._id} className="flex-1 mb-4">
+              <FileCard file={item} />
+            </View>
           )}
-          contentContainerClassName="p-5 pb-24"
-          ListEmptyComponent={
-            <Text className="text-center text-gray-400 mt-10">
-              No files found
-            </Text>
+          ListHeaderComponent={
+            <View className="space-y-2 py-14 px-6">
+              <Text className="text-3xl font-bold tracking-tight text-violet-950">
+                Your Image Gallery
+              </Text>
+              <Text className="text-slate-500">
+                Browse, search, and manage your uploaded images
+              </Text>
+            </View>
           }
         />
       )}
