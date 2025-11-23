@@ -1,50 +1,114 @@
-# Welcome to your Expo app 👋
+# 📱Expo HeyaFile Mobile App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A native mobile application built with **Expo (React Native)** and styled with **NativeWind** (Tailwind CSS).  
+It consumes the NestJS API to manage documents in real-time.
 
-## Get started
+## 🚀Features
 
-1. Install dependencies
+- **Native Experience**: Smooth iOS and Android experience powered by Expo
+- **Modern Styling**: Utility-first styling with NativeWind (Tailwind CSS for React Native)
+- **Real-time**: Updates instantly using Socket.IO when documents are added/removed on the web or other devices
+- **File Upload**: Supports selecting and uploading files from the device storage
+- **Zero Config**: Connects to the public NestJS API (no authentication required)
 
-   ```bash
-   npm install
-   ```
+## 🛠️Tech Stack
 
-2. Start the app
+- **Framework**: Expo SDK 50+
+- **Language**: TypeScript
+- **Styling**: NativeWind (Tailwind CSS)
+- **HTTP Client**: Axios
+- **Real-time**: socket.io-client
+- **File Picker**: expo-document-picker
 
-   ```bash
-   npx expo start
-   ```
+## ⚙️Installation
 
-In the output, you'll find options to open the app in a
+### Prerequisites
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- Node.js (v18+)
+- Expo Go app installed on your physical device (iOS/Android) or an Emulator
+- The Backend (NestJS) running on your local machine
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+### 1. Clone and Install
 
 ```bash
-npm run reset-project
+# Enter the mobile directory
+cd mobile-app
+
+# Install dependencies
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### 2. Network Configuration (CRITICAL)
 
-## Learn more
+Since the app runs on a physical device or emulator, it **cannot access `localhost`**.  
+You **must** use your computer’s local network IP address.
 
-To learn more about developing your project with Expo, look at the following resources:
+1. Find your local IP
+   - Windows → `ipconfig` in the terminal
+   - macOS/Linux → `ifconfig` or `ip addr show`
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+2. Open `src/utils/api.ts`
 
-## Join the community
+3. Replace the `LOCAL_IP` constant with your real IP:
 
-Join our community of developers creating universal apps.
+```ts
+// constants/api.ts
+export const API_URL =
+  Platform.OS === "android"
+    ? "http://LOCAL_API:3002" // ← Replace with your actual IP
+    : "http://localhost:3002";
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+### 3. Start the App
+
+```bash
+# Clear cache is recommended when using NativeWind
+npx expo start --clear
+```
+
+- Scan the QR code with Expo Go (Android) or the Camera app (iOS).
+
+- Press a to open on Android Emulator.
+
+- Press i to open on iOS Simulator.
+
+## 📂Project Structure
+
+```tree
+mobile-app/
+├── .expo/
+├── .vscode/
+├── app/
+│   └── (tabs)/
+│       ├── _layout.tsx
+│       ├── index.tsx
+│       ├── files/
+│       │   ├── [id].tsx
+│       │   └── _layout.tsx
+│       └── modal.tsx
+├── assets/
+├── components/
+├── constants/
+├── └── api.ts
+```
+
+### 🔌Socket.IO Integration
+
+The app connects to the backend via WebSocket to receive live updates.
+
+- **Endpoint**: `http://<YOUR_LOCAL_IP>:3002`
+- **Events**:
+  - `file_added` → Adds the new file card to the FlatList instantly
+  - `file_deleted` → Removes the item from the list with smooth animation
+
+### ⚠️Common Issues
+
+- **Network Request Failed**  
+  Make sure your phone and computer are on the **same Wi-Fi network**  
+  Check that your firewall allows incoming/outgoing connections on **port 3002**
+
+- **Styling Issues** (Tailwind/NativeWind classes not working)  
+  Stop the dev server and restart with cache cleared:
+  ```bash
+  npx expo start --clear
+  ```
