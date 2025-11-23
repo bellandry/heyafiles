@@ -8,6 +8,7 @@ import {
 } from "react-native";
 
 import { FileCard } from "@/components/file-card";
+import { SearchInput } from "@/components/search-input";
 import { UploadModal } from "@/components/upload-modal";
 import { WelcomeScreen } from "@/components/welcome-screen";
 import { API_URL } from "@/constants/api";
@@ -19,10 +20,12 @@ import { io, Socket } from "socket.io-client";
 
 export default function HomeScreen() {
   const [files, setFiles] = useState<FileData[]>([]);
+  const [filteredFiles, setFilteredFiles] = useState<FileData[]>([]);
   const [loading, setLoading] = useState(true);
   const [socket, setSocket] = useState<Socket | null>(null);
   const [showSplash, setShowSplash] = useState(true);
   const [isUploadModalVisible, setUploadModalVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const fetchFiles = async () => {
     try {
@@ -30,6 +33,7 @@ export default function HomeScreen() {
       if (!response.ok) throw new Error("Failed to fetch files");
       const data = await response.json();
       setFiles(data);
+      setFilteredFiles(data);
     } catch (error) {
       console.log(error);
       Alert.alert("Error", "Could not load files");
@@ -59,17 +63,37 @@ export default function HomeScreen() {
         if (prev.find((f) => f._id === newFile._id)) return prev;
         return [newFile, ...prev];
       });
+      setFilteredFiles((prev) => {
+        if (prev.find((f) => f._id === newFile._id)) return prev;
+        return [newFile, ...prev];
+      });
     });
 
     newSocket.on("file_deleted", (deletedId: string) => {
       console.log("Socket: file_deleted", deletedId);
       setFiles((prev) => prev.filter((f) => f._id !== deletedId));
+      setFilteredFiles((prev) => prev.filter((f) => f._id !== deletedId));
     });
 
     return () => {
       newSocket.disconnect();
     };
   }, []);
+
+  // Search function
+  useEffect(() => {
+    if (searchQuery.trim() === "") {
+      setFilteredFiles(files);
+    } else {
+      const query = searchQuery.toLowerCase();
+      const filtered = files.filter(
+        (file) =>
+          file.title.toLowerCase().includes(query) ||
+          file.description.toLowerCase().includes(query)
+      );
+      setFilteredFiles(filtered);
+    }
+  }, [searchQuery, files]);
 
   // Display welcome screen
   if (showSplash) {
@@ -79,12 +103,12 @@ export default function HomeScreen() {
   return (
     <SafeAreaView className="flex-1 bg-gray-100">
       {/* Header */}
-      <View className="z-10 flex-row justify-between items-center px-6 py-4 bg-white shadow-sm">
+      <View className="z-10 flex-row items-center justify-between px-6 py-4 bg-white shadow-sm">
         <View className="-space-y-1">
           <Text className="text-2xl font-bold text-violet-900">HeyaFiles</Text>
           <Text className="text-xs">Simple files storage</Text>
         </View>
-        <View className="flex flex-row gap-2 items-center">
+        <View className="flex flex-row items-center gap-2">
           <View
             className={`h-3 w-3 rounded-full ${socket?.connected ? "bg-green-500" : "bg-red-500"}`}
           />
@@ -94,12 +118,12 @@ export default function HomeScreen() {
 
       {/* List */}
       {loading ? (
-        <View className="flex-1 justify-center items-center">
+        <View className="items-center justify-center flex-1">
           <ActivityIndicator size="large" color="#2563eb" />
         </View>
       ) : (
         <FlatList
-          data={files}
+          data={filteredFiles}
           numColumns={2}
           keyExtractor={(item) => item._id}
           contentContainerStyle={{ padding: 10 }}
@@ -108,7 +132,7 @@ export default function HomeScreen() {
           onRefresh={onRefresh}
           renderItem={({ item, index }) => (
             <View key={item._id} className="flex-1 mb-4">
-              <FileCard file={item} files={files} index={index} />
+              <FileCard file={item} files={filteredFiles} index={index} />
             </View>
           )}
           ListHeaderComponent={
@@ -119,10 +143,17 @@ export default function HomeScreen() {
               <Text className="text-slate-500">
                 Browse, search, and manage your uploaded images
               </Text>
+              <View className="mt-10">
+                <SearchInput
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                  placeholder="Search files..."
+                />
+              </View>
             </View>
           }
           ListEmptyComponent={
-            <View className="flex-1 justify-center items-center py-20">
+            <View className="items-center justify-center flex-1 py-20">
               <Text className="mb-4 text-xl font-semibold text-slate-600">
                 Aucun fichier trouvé
               </Text>
@@ -139,7 +170,7 @@ export default function HomeScreen() {
       )}
       <TouchableOpacity
         onPress={() => setUploadModalVisible(true)}
-        className="flex absolute right-8 bottom-8 flex-row gap-2 justify-center items-center p-4 bg-violet-600 rounded-full shadow-md shadow-slate-500 elevation-5"
+        className="absolute flex flex-row items-center justify-center gap-2 p-4 rounded-full shadow-md right-8 bottom-8 bg-violet-600 shadow-slate-500 elevation-5"
       >
         <Plus color="white" size={20} />
         <Text className="font-medium text-white">Ajouter</Text>
