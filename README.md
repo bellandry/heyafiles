@@ -1,5 +1,7 @@
 # 📑 HeyaFiles Files Manager
 
+![HeyaFiles preview](screen.png)
+
 ## 📖 Overview
 
 This project is a complete full-stack solution designed to demonstrate real-time data synchronization across a central server, a web application, and a mobile application. It allows users to upload, view, and delete documents seamlessly across devices without manual refreshing.
