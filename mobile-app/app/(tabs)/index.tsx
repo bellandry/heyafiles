@@ -104,6 +104,8 @@ export default function HomeScreen() {
           keyExtractor={(item) => item._id}
           contentContainerStyle={{ padding: 10 }}
           columnWrapperStyle={{ gap: 12 }}
+          refreshing={loading}
+          onRefresh={onRefresh}
           renderItem={({ item, index }) => (
             <View key={item._id} className="flex-1 mb-4">
               <FileCard file={item} files={files} index={index} />

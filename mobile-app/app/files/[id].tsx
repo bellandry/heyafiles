@@ -3,9 +3,11 @@ import { API_URL } from "@/constants/api";
 import axios from "axios";
 import { router, useLocalSearchParams } from "expo-router";
 import {
+  ArrowLeft,
   ChevronLeft,
   Download,
   FileWarning,
+  RefreshCcw,
   Trash2,
 } from "lucide-react-native";
 import { useEffect, useState } from "react";
@@ -14,6 +16,7 @@ import {
   Alert,
   Image,
   Linking,
+  RefreshControl,
   Text,
   TouchableOpacity,
   View,
@@ -90,41 +93,56 @@ export default function FileDetailPage() {
     );
   }
 
+  const onRefresh = async () => {
+    setLoading(true);
+    await fetchFile();
+  };
+
   if (!file) {
     return (
-      <View className="flex-1 justify-center items-center px-6 bg-gray-50">
+      <View className="flex-1 justify-center items-center px-4 bg-gray-50">
         <FileWarning size={48} color="#A78BFA" />
-        <Text className="text-2xl font-semibold text-gray-800 mt-4 mb-4">
+        <Text className="mt-4 mb-4 text-2xl font-semibold text-gray-800">
           Fichier non trouvé
         </Text>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          className="bg-violet-600 px-4 py-3 rounded-xl"
-        >
-          <Text className="text-white font-bold">Retour</Text>
-        </TouchableOpacity>
+        <View className="flex flex-row gap-4 items-center p-4">
+          <TouchableOpacity
+            onPress={() => router.back()}
+            className="flex flex-row flex-1 gap-2 justify-center items-center px-4 py-3 bg-violet-600 rounded-xl"
+          >
+            <ArrowLeft size={20} color="white" />
+            <Text className="font-bold text-white">Retour</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={onRefresh}
+            className="flex flex-row flex-1 gap-2 justify-center items-center px-4 py-3 rounded-xl border border-violet-600"
+          >
+            <RefreshCcw size={20} color="#7c3aed" />
+            <Text className="font-bold text-violet-600">Rafraichir</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
-      {/* Header */}
-      <View className="flex-row items-center px-4 py-4 border-b border-gray-200">
-        <TouchableOpacity onPress={() => router.back()} className="p-2">
-          <ChevronLeft size={26} color="black" />
-        </TouchableOpacity>
-        <Text className="flex-1 text-center text-lg font-semibold mr-8">
-          Détails du fichier
-        </Text>
-      </View>
-
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ paddingBottom: 40 }}
+        refreshControl={
+          <RefreshControl refreshing={loading} onRefresh={onRefresh} />
+        }
       >
+        {/* Header */}
+        <TouchableOpacity
+          onPress={() => router.back()}
+          className="absolute top-5 left-5 z-20 flex-row items-center p-2 rounded-full bg-white/80"
+        >
+          <ChevronLeft size={26} color="black" />
+        </TouchableOpacity>
         {/* Image */}
-        <View className="w-full aspect-square bg-gray-200">
+        <View className="w-full bg-gray-200 aspect-square">
           {file.imageUrl ? (
             <Image
               source={{ uri: file.imageUrl }}
@@ -132,7 +150,7 @@ export default function FileDetailPage() {
               resizeMode="cover"
             />
           ) : (
-            <View className="flex-1 items-center justify-center">
+            <View className="flex-1 justify-center items-center">
               <Text className="text-gray-500">Aucune image disponible</Text>
             </View>
           )}
@@ -144,26 +162,26 @@ export default function FileDetailPage() {
             {file.title}
           </Text>
           {file.description && (
-            <Text className="text-gray-700 py-4">{file.description}</Text>
+            <Text className="py-4 text-gray-700">{file.description}</Text>
           )}
-          <Text className="text-gray-500 text-sm border-t border-gray-200 mt-4 py-2">
+          <Text className="py-2 mt-4 text-sm text-gray-500 border-t border-gray-200">
             Publiée le: {new Date(file.createdAt).toLocaleDateString("fr-FR")}
           </Text>
 
           <View className="flex-row gap-3 mt-4">
             <TouchableOpacity
               onPress={handleDownload}
-              className="flex-1 bg-violet-900 px-4 py-3 rounded-xl flex-row items-center justify-center"
+              className="flex-row flex-1 gap-2 justify-center items-center px-4 py-3 bg-violet-900 rounded-xl"
             >
-              <Download size={20} color="white" className="mr-2" />
-              <Text className="text-white font-bold">Télécharger</Text>
+              <Download size={20} color="white" />
+              <Text className="font-bold text-white">Télécharger</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={confirmDelete}
-              className="flex-1 bg-red-600 px-4 py-3 rounded-xl flex-row items-center justify-center"
+              className="flex-row flex-1 gap-2 justify-center items-center px-4 py-3 bg-red-600 rounded-xl"
             >
-              <Trash2 size={20} color="white" className="mr-2" />
-              <Text className="text-white font-bold">
+              <Trash2 size={20} color="white" />
+              <Text className="font-bold text-white">
                 {deleting ? "Suppression..." : "Supprimer"}
               </Text>
             </TouchableOpacity>
@@ -173,10 +191,10 @@ export default function FileDetailPage() {
         {/* Related Files */}
         {relatedFiles.length > 0 && (
           <View className="px-4 mt-6">
-            <Text className="text-lg font-semibold text-gray-800 mb-4">
+            <Text className="mb-4 text-lg font-semibold text-gray-800">
               Autres fichiers
             </Text>
-            <View className="flex flex-row flex-wrap justify-center gap-4">
+            <View className="flex flex-row flex-wrap gap-4 justify-center">
               {relatedFiles.map((relatedFile, index) => (
                 <View key={relatedFile._id} className="w-48">
                   <FileCard
