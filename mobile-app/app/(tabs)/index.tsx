@@ -9,6 +9,7 @@ import {
 
 import { FileCard } from "@/components/file-card";
 import { UploadModal } from "@/components/upload-modal";
+import { WelcomeScreen } from "@/components/welcome-screen";
 import { API_URL } from "@/constants/api";
 import { FileData } from "@/types/file";
 import { Plus } from "lucide-react-native";
@@ -20,7 +21,7 @@ export default function HomeScreen() {
   const [files, setFiles] = useState<FileData[]>([]);
   const [loading, setLoading] = useState(true);
   const [socket, setSocket] = useState<Socket | null>(null);
-  const [selectedFile, setSelectedFile] = useState<FileData | null>(null);
+  const [showSplash, setShowSplash] = useState(true);
   const [isUploadModalVisible, setUploadModalVisible] = useState(false);
 
   const fetchFiles = async () => {
@@ -35,6 +36,11 @@ export default function HomeScreen() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const onRefresh = async () => {
+    setLoading(true);
+    await fetchFiles();
   };
 
   useEffect(() => {
@@ -58,24 +64,27 @@ export default function HomeScreen() {
     newSocket.on("file_deleted", (deletedId: string) => {
       console.log("Socket: file_deleted", deletedId);
       setFiles((prev) => prev.filter((f) => f._id !== deletedId));
-      setSelectedFile((current) =>
-        current?._id === deletedId ? null : current
-      );
     });
 
     return () => {
       newSocket.disconnect();
     };
   }, []);
+
+  // Display welcome screen
+  if (showSplash) {
+    return <WelcomeScreen onFinish={() => setShowSplash(false)} />;
+  }
+
   return (
     <SafeAreaView className="flex-1 bg-gray-100">
       {/* Header */}
-      <View className="px-6 py-4 bg-white shadow-sm z-10 flex-row justify-between items-center">
+      <View className="z-10 flex-row justify-between items-center px-6 py-4 bg-white shadow-sm">
         <View className="-space-y-1">
           <Text className="text-2xl font-bold text-violet-900">HeyaFiles</Text>
           <Text className="text-xs">Simple files storage</Text>
         </View>
-        <View className="flex items-center flex-row gap-2">
+        <View className="flex flex-row gap-2 items-center">
           <View
             className={`h-3 w-3 rounded-full ${socket?.connected ? "bg-green-500" : "bg-red-500"}`}
           />
@@ -101,7 +110,7 @@ export default function HomeScreen() {
             </View>
           )}
           ListHeaderComponent={
-            <View className="space-y-2 py-10 px-2">
+            <View className="px-2 py-10 space-y-2">
               <Text className="text-3xl font-bold tracking-tight text-violet-950">
                 Your Image Gallery
               </Text>
@@ -110,14 +119,28 @@ export default function HomeScreen() {
               </Text>
             </View>
           }
+          ListEmptyComponent={
+            <View className="flex-1 justify-center items-center py-20">
+              <Text className="mb-4 text-xl font-semibold text-slate-600">
+                Aucun fichier trouvé
+              </Text>
+
+              <TouchableOpacity
+                onPress={onRefresh}
+                className="px-6 py-3 bg-violet-600 rounded-xl"
+              >
+                <Text className="font-semibold text-white">Réessayer</Text>
+              </TouchableOpacity>
+            </View>
+          }
         />
       )}
       <TouchableOpacity
         onPress={() => setUploadModalVisible(true)}
-        className="absolute bottom-8 right-8 bg-violet-600 rounded-full shadow-md shadow-slate-500 flex flex-row p-4 gap-2 items-center justify-center elevation-5"
+        className="flex absolute right-8 bottom-8 flex-row gap-2 justify-center items-center p-4 bg-violet-600 rounded-full shadow-md shadow-slate-500 elevation-5"
       >
         <Plus color="white" size={20} />
-        <Text className="text-white  font-medium">Ajouter</Text>
+        <Text className="font-medium text-white">Ajouter</Text>
       </TouchableOpacity>
       <UploadModal
         visible={isUploadModalVisible}

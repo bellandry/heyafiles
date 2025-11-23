@@ -26,7 +26,6 @@ export default function FileDetailPage() {
   const [file, setFile] = useState<any>(null);
   const [relatedFiles, setRelatedFiles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
   const fetchFile = async () => {
@@ -57,10 +56,21 @@ export default function FileDetailPage() {
     }
   };
 
+  const confirmDelete = () => {
+    Alert.alert(
+      "Confirmer la suppression",
+      `Êtes-vous sûr de vouloir supprimer "${file.title}" ? Cette action est irréversible.`,
+      [
+        { text: "Annuler", style: "cancel" },
+        { text: "Supprimer", style: "destructive", onPress: handleDelete },
+      ]
+    );
+  };
+
   const handleDelete = async () => {
     try {
       setDeleting(true);
-      await axios.delete(`${API_URL}/${id}`);
+      await axios.delete(`${API_URL}/files/${id}`);
       Alert.alert("Succès", "Fichier supprimé avec succès");
       router.back();
     } catch (error) {
@@ -68,7 +78,6 @@ export default function FileDetailPage() {
       Alert.alert("Erreur", "Impossible de supprimer le fichier");
     } finally {
       setDeleting(false);
-      setShowDeleteDialog(false);
     }
   };
 
@@ -150,7 +159,7 @@ export default function FileDetailPage() {
               <Text className="text-white font-bold">Télécharger</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={() => setShowDeleteDialog(true)}
+              onPress={confirmDelete}
               className="flex-1 bg-red-600 px-4 py-3 rounded-xl flex-row items-center justify-center"
             >
               <Trash2 size={20} color="white" className="mr-2" />
