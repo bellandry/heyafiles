@@ -37,10 +37,10 @@ export default function Home() {
 
     // Connect to Socket.io
     const socket = io(SOCKET_URL);
-    setSocket(socket);
 
     socket.on("connect", () => {
       console.log("connectet to websocket");
+      setSocket(socket);
     });
 
     // Get added document socket notification
@@ -56,6 +56,11 @@ export default function Home() {
       setFilteredFiles((prev) => prev.filter((file) => file._id !== deletedId));
       toast.info("Un fichier  a été supprimé");
     });
+
+    // Clean on component unmount
+    return () => {
+      socket.disconnect();
+    };
   }, []);
 
   useEffect(() => {
